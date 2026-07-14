@@ -35,8 +35,16 @@ class ChordImportService
     protected function fetch(string $url): string
     {
         $response = Http::withHeaders([
-            'User-Agent' => 'Mozilla/5.0 (compatible; ChordImportBot/1.0)',
+            'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36',
+            'Accept' => 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+            'Accept-Language' => 'id-ID,id;q=0.9,en-US;q=0.8,en;q=0.7',
         ])->timeout(15)->get($url);
+
+        if ($response->status() === 403) {
+            throw new \RuntimeException(
+                'Situs ini memblokir akses otomatis (403). Coba pakai mode "Tempel Manual" di bawah: buka link-nya sendiri di browser, copy isinya, lalu tempel di sana.'
+            );
+        }
 
         if (! $response->successful()) {
             throw new \RuntimeException('Gagal mengambil halaman (' . $response->status() . ').');

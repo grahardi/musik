@@ -13,6 +13,15 @@
             <button type="button" id="btn_import" class="btn btn-info text-white">Ambil Draft</button>
         </div>
         <div id="import_status" class="small mt-2"></div>
+
+        <hr>
+        <p class="text-muted small mb-2">
+            Kalau muncul error 403 (situs blokir akses otomatis), pakai cara ini:
+            buka link-nya sendiri di browser kamu, select-all isi chord-nya, copy,
+            tempel di kotak bawah ini, lalu klik "Convert & Isi Form".
+        </p>
+        <textarea id="paste_raw" rows="6" class="form-control mb-2" placeholder="Tempel isi chord yang di-copy dari browser di sini..."></textarea>
+        <button type="button" id="btn_convert_paste" class="btn btn-sm btn-outline-info">Convert &amp; Isi Form</button>
     </div>
 </div>
 
@@ -116,4 +125,25 @@ document.getElementById('btn_import').addEventListener('click', function () {
         statusEl.innerHTML = '<span class="text-danger">Gagal mengambil data. Coba lagi.</span>';
     });
 });
-</script>
+document.getElementById('btn_convert_paste').addEventListener('click', function () {
+    let raw = document.getElementById('paste_raw').value;
+
+    if (!raw.trim()) {
+        alert('Tempel dulu isi chord-nya di kotak.');
+        return;
+    }
+
+    // Convert format Ultimate Guitar [ch]C[/ch] / [tab]...[/tab] jadi [C] biasa.
+    // Kalau yang ditempel format chordtela ([C] biasa), ini tidak mengubah apa-apa.
+    let converted = raw
+        .replace(/\[\/?tab\]/g, '')
+        .replace(/\[ch\](.*?)\[\/ch\]/g, '[$1]')
+        .trim();
+
+    document.getElementById('chord_body').value = converted;
+    document.getElementById('source_site').value = 'manual';
+
+    document.getElementById('import_status').innerHTML =
+        '<span class="text-success">Berhasil di-convert ke kolom "Isi Chord" di bawah. Cek judul/penyanyi/key manual ya.</span>';
+});
+
