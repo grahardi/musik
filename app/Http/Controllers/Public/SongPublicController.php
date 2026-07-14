@@ -30,8 +30,8 @@ class SongPublicController extends Controller
 
         $latest = Song::published()->latest()->take(12)->get();
 
-        $genres = Genre::withCount(['songs' => fn ($q) => $q->published()])
-            ->having('songs_count', '>', 0)
+        $genres = Genre::whereHas('songs', fn ($q) => $q->published())
+            ->withCount(['songs' => fn ($q) => $q->published()])
             ->orderBy('name')
             ->get();
 
