@@ -47,6 +47,14 @@ class Song extends Model
             // Huruf awal buat filter abjad. Fallback '#' kalau bukan huruf (angka/simbol).
             $song->first_letter_title = static::firstLetter($song->title);
             $song->first_letter_artist = static::firstLetter($song->artist);
+
+            // Kolom ini NOT NULL di DB (enum + default 'manual'), tapi kalau
+            // form mengirim string kosong, middleware ConvertEmptyStringsToNull
+            // bawaan Laravel bikin ini jadi null -- dan null EKSPLISIT tidak
+            // memicu default kolom. Jadi kita jaga manual di sini.
+            if (empty($song->source_site)) {
+                $song->source_site = 'manual';
+            }
         });
     }
 
