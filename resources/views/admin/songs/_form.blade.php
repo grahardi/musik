@@ -81,7 +81,7 @@
         <button type="button" id="btn_to_inline" class="btn btn-sm btn-outline-secondary mt-2">
             🔧 Ubah ke Format Inline [C]
         </button>
-        <span class="text-muted small">(pakai ini kalau auto-detect di halaman publik masih salah, biar formatnya pasti)</span>
+        <span class="text-muted small">(chord yang kedetect otomatis dibungkus <code>[C]</code>; yang tidak kedetect dibiarkan apa adanya di tempatnya, tinggal tambahin <code>[ ]</code> manual)</span>
         @error('chord_body') <div class="text-danger small">{{ $message }}</div> @enderror
     </div>
 
@@ -177,10 +177,14 @@ function convertToInlineFormat(text) {
         return tokens;
     }
 
-    function isFullChordLine(line) {
+    function isChordLikeLine(line) {
         const tokens = getTokensWithOffset(line);
         if (tokens.length === 0) return false;
-        return tokens.every(t => chordTokenRe.test(t.text));
+        const matched = tokens.filter(t => chordTokenRe.test(t.text)).length;
+        // Minimal separuh token di baris ini kelihatan seperti chord.
+        // Token yang tidak match tetap dibiarkan apa adanya (tidak dibungkus []),
+        // supaya gampang kamu tambahin manual kalau memang itu chord.
+        return (matched / tokens.length) >= 0.5;
     }
 
     function mergeChordIntoLyric(chordLine, lyricLine) {
@@ -189,10 +193,14 @@ function convertToInlineFormat(text) {
         let shift = 0;
 
         tokens.forEach(t => {
-            const bracket = `[${t.text}]`;
+            // Hanya token yang KEDETECT sebagai chord yang dibungkus [ ].
+            // Yang tidak terdeteksi disisipkan apa adanya (polos) di posisi yang sama,
+            // biar kelihatan jelas mana yang perlu ditambah [] manual.
+            const isChord = chordTokenRe.test(t.text);
+            const insertText = isChord ? `[${t.text}]` : t.text;
             const insertPos = Math.min(t.offset + shift, chars.length);
-            chars.splice(insertPos, 0, ...Array.from(bracket));
-            shift += bracket.length;
+            chars.splice(insertPos, 0, ...Array.from(insertText));
+            shift += insertText.length;
         });
 
         return chars.join('');
@@ -212,16 +220,19 @@ function convertToInlineFormat(text) {
             continue;
         }
 
-        if (isFullChordLine(line)) {
+        if (isChordLikeLine(line)) {
             const nextLine = lines[i + 1];
-            const nextIsLyric = nextLine !== undefined && nextLine.trim() !== '' && !isFullChordLine(nextLine) && !nextLine.includes('[');
+            const nextIsLyric = nextLine !== undefined && nextLine.trim() !== '' && !isChordLikeLine(nextLine) && !nextLine.includes('[');
 
             if (nextIsLyric) {
                 result.push(mergeChordIntoLyric(line, nextLine));
                 i += 2;
             } else {
-                // Baris chord berdiri sendiri (mis. intro/outro tanpa lirik di bawahnya)
-                const bracketed = getTokensWithOffset(line).map(t => `[${t.text}]`).join(' ');
+                // Baris chord berdiri sendiri (mis. intro/outro tanpa lirik di bawahnya).
+                // Token yang kedetect dibungkus [C], yang tidak kedetect dibiarkan polos.
+                const bracketed = getTokensWithOffset(line)
+                    .map(t => chordTokenRe.test(t.text) ? `[${t.text}]` : t.text)
+                    .join(' ');
                 result.push(bracketed);
                 i++;
             }
