@@ -31,7 +31,7 @@
             <div class="d-flex align-items-center gap-2">
                 <button id="btn-scroll-toggle" class="btn btn-sm btn-success" data-state="paused">▶ Autoscroll</button>
                 <span class="small text-muted">Speed:</span>
-                <input type="range" id="scroll-speed" min="1" max="10" value="3" style="width:100px;">
+                <input type="range" id="scroll-speed" min="0.5" max="20" step="0.5" value="3" style="width:100px;">
             </div>
 
             <div class="vr d-none d-md-block"></div>

@@ -67,17 +67,12 @@
 
     // ---- Autoscroll ----
     let scrollInterval = null;
-    let scrollSpeed = 3; // px per tick (nilai mentah dari slider), diatur user
-
-    // PC/laptop kerasa 2x terlalu cepat, HP kerasa 2x terlalu lambat --
-    // jadi dikasih pengali beda per device biar kerasa pas di keduanya.
-    const isMobile = window.matchMedia('(max-width: 768px)').matches;
-    const DEVICE_SPEED_MULTIPLIER = isMobile ? 2 : 0.5;
+    let scrollSpeed = 3; // px per tick, diatur slider
 
     function startAutoscroll() {
         stopAutoscroll();
         scrollInterval = setInterval(function () {
-            window.scrollBy(0, scrollSpeed * DEVICE_SPEED_MULTIPLIER);
+            window.scrollBy(0, scrollSpeed);
 
             // Auto-stop kalau sudah mentok bawah
             if ((window.innerHeight + window.scrollY) >= document.body.scrollHeight - 5) {
@@ -115,7 +110,7 @@
         const speedSlider = document.getElementById('scroll-speed');
         if (speedSlider) {
             speedSlider.addEventListener('input', function (e) {
-                scrollSpeed = parseInt(e.target.value, 10);
+                scrollSpeed = parseFloat(e.target.value);
             });
         }
 

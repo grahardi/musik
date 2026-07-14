@@ -205,17 +205,19 @@ Di atas tabel daftar chord (`/admin/songs`), sekarang ada 2 kartu:
 
 Klik judul lagu di widget langsung ke halaman edit.
 
-## Update: Autoscroll Speed Disesuaikan per Device
+## Update: Range Speed Autoscroll Diperlebar
 
-Kecepatan autoscroll dulu sama rata di semua device, ternyata kerasa timpang
-(PC/laptop 2x kecepetan, HP 2x kelambatan). Sekarang `chord-tools.js` deteksi
-lebar layar (`max-width: 768px` = dianggap mobile) dan kasih pengali beda:
-- **Desktop/laptop**: kecepatan asli slider × 0.5 (diperlambat setengah)
-- **Mobile**: kecepatan asli slider × 2 (dipercepat dua kali)
+Percobaan sebelumnya pakai pengali per-device (desktop/mobile) ternyata
+tidak pas, jadi dibalikin simpel: **range slider-nya aja yang diperlebar**.
 
-Slider tetap sama (1-10), yang berubah cuma pengali di belakangnya. Kalau
-masih kurang pas, tinggal ubah angka `0.5` / `2` di `DEVICE_SPEED_MULTIPLIER`
-(`public/js/chord-tools.js`).
+- Dulu: `1` sampai `10`
+- Sekarang: `0.5` sampai `20` (step `0.5`)
+
+Jadi ujung bawah lebih lambat dari sebelumnya, ujung atas lebih cepat dari
+sebelumnya, user tinggal geser slider cari yang paling nyaman sendiri (baik
+di PC maupun HP). File yang berubah: `public/js/chord-tools.js` (parseFloat,
+bukan parseInt lagi) dan `resources/views/public/show.blade.php` (atribut
+`min`/`max`/`step` slider).
 
 ## Kompatibilitas PHP 8.5
 
