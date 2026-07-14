@@ -30,6 +30,20 @@
         }
         .chord-token { color:#0a2472; font-weight:700; }
         [data-bs-theme="dark"] .chord-token { color:#7aa7ff; }
+
+        @media print {
+            .navbar, footer, .no-print { display: none !important; }
+            body, .container { background: #fff !important; color: #000 !important; }
+            pre.chord-view {
+                background: #fff !important;
+                color: #000 !important;
+                border: none;
+                padding: 0;
+                font-size: 12pt;
+            }
+            .chord-token { color: #000 !important; font-weight: 700; }
+            a[href]::after { content: ""; } /* jangan cetak URL link */
+        }
     </style>
 </head>
 <body>

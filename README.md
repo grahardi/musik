@@ -169,6 +169,16 @@ jalan pintas kalau auto-detect di halaman publik masih meleset di kasus
 yang aneh-aneh — begitu diubah ke inline, tidak butuh deteksi lagi karena
 formatnya sudah eksplisit.
 
+## Update: Fitur Cetak Chord
+
+Tombol "🖨 Cetak" di halaman detail lagu, sebelah tombol Autoscroll.
+Klik langsung buka dialog print browser (`window.print()`).
+
+CSS `@media print` di `layouts/public.blade.php` otomatis:
+- Sembunyikan navbar, footer, toolbar transpose/autoscroll, related songs, dan catatan sumber (semua yang dikasih class `no-print`)
+- Paksa warna putih/hitam walau lagi dark mode (biar hemat tinta & tetap kebaca)
+- Judul lagu, penyanyi, key/capo, dan isi chord tetap muncul (termasuk chord yang lagi di-transpose — karena itu langsung ubah teks di DOM, bukan cuma tampilan)
+
 ## Kompatibilitas PHP 8.5
 
 Tidak ada penyesuaian kode yang diperlukan — deprecation di PHP 8.5 (operator

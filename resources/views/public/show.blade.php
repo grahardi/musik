@@ -16,7 +16,7 @@
     </div>
 
     {{-- Toolbar transpose + autoscroll, sticky biar tetap kelihatan saat scroll --}}
-    <div class="card mb-3 sticky-top" style="top: 0.5rem; z-index: 10;">
+    <div class="card mb-3 sticky-top no-print" style="top: 0.5rem; z-index: 10;">
         <div class="card-body py-2 d-flex flex-wrap gap-3 align-items-center">
             <div class="d-flex align-items-center gap-2">
                 <span class="small text-muted">Transpose:</span>
@@ -33,19 +33,24 @@
                 <span class="small text-muted">Speed:</span>
                 <input type="range" id="scroll-speed" min="1" max="10" value="3" style="width:100px;">
             </div>
+
+            <div class="vr d-none d-md-block"></div>
+
+            <button id="btn-print" type="button" class="btn btn-sm btn-outline-dark">🖨 Cetak</button>
         </div>
     </div>
 
     <pre class="chord-view">{!! $song->renderedChordHtml() !!}</pre>
 
     @if ($song->source_url)
-        <p class="text-muted small mt-3">
+        <p class="text-muted small mt-3 no-print">
             Referensi awal diambil dari <a href="{{ $song->source_url }}" target="_blank" rel="noopener nofollow">sumber asli</a>, disunting ulang untuk situs ini.
         </p>
     @endif
 
     @if ($related->isNotEmpty())
-        <hr class="my-4">
+        <hr class="my-4 no-print">
+        <div class="no-print">
         <h6 class="mb-3">Chord Lainnya {{ $related->contains('artist', $song->artist) ? "dari {$song->artist}" : 'yang Mungkin Kamu Suka' }}</h6>
         <div class="row row-cols-1 row-cols-md-2 g-2">
             @foreach ($related as $item)
@@ -61,9 +66,15 @@
                 </div>
             @endforeach
         </div>
+        </div>
     @endif
 @endsection
 
 @section('scripts')
     <script src="{{ asset('js/chord-tools.js') }}"></script>
+    <script>
+        document.getElementById('btn-print')?.addEventListener('click', function () {
+            window.print();
+        });
+    </script>
 @endsection
