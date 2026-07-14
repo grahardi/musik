@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\SongController;
+use App\Http\Controllers\Admin\GenreController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -21,4 +22,5 @@ Route::middleware(['auth'])
     ->group(function () {
         Route::get('songs/import-preview', [SongController::class, 'importPreview'])->name('songs.import-preview');
         Route::resource('songs', SongController::class);
+        Route::resource('genres', GenreController::class)->except(['show']);
     });

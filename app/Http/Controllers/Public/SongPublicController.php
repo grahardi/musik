@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Public;
 
 use App\Http\Controllers\Controller;
+use App\Models\Genre;
 use App\Models\Song;
 use Illuminate\Http\Request;
 
@@ -29,12 +30,25 @@ class SongPublicController extends Controller
 
         $latest = Song::published()->latest()->take(12)->get();
 
+        $genres = Genre::withCount(['songs' => fn ($q) => $q->published()])
+            ->having('songs_count', '>', 0)
+            ->orderBy('name')
+            ->get();
+
         return view('public.home', [
             'alphabet' => $this->alphabet,
             'counts' => $counts,
             'mode' => $mode,
             'latest' => $latest,
+            'genres' => $genres,
         ]);
+    }
+
+    public function byGenre(Genre $genre)
+    {
+        $songs = $genre->songs()->published()->orderBy('title')->paginate(24)->withQueryString();
+
+        return view('public.by-genre', compact('songs', 'genre'));
     }
 
     public function byLetter(Request $request, string $letter)
@@ -80,6 +94,7 @@ class SongPublicController extends Controller
     {
         abort_unless($song->is_published, 404);
 
+        $song->load('genre');
         $song->increment('views_count');
 
         return view('public.show', compact('song'));

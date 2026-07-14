@@ -72,6 +72,39 @@ Kalau nanti pindah balik ke MySQL, tinggal ganti `ilike` jadi `like` lagi di:
 - `app/Http/Controllers/Admin/SongController.php`
 - `app/Http/Controllers/Public/SongPublicController.php`
 
+## Update: Fitur Genre / Kategori
+
+File baru:
+- `database/migrations/2026_07_14_000001_create_genres_table.php`
+- `database/migrations/2026_07_14_000002_add_genre_id_to_songs_table.php`
+- `app/Models/Genre.php`
+- `app/Http/Controllers/Admin/GenreController.php`
+- `resources/views/admin/genres/{index,create,edit}.blade.php`
+- `resources/views/public/by-genre.blade.php`
+- `database/seeders/GenreSeeder.php`
+
+Route baru:
+- Admin: `/admin/genres` (CRUD)
+- Publik: `/genre/{slug}`
+
+Cara pakai:
+```bash
+php artisan migrate
+php artisan db:seed --class=Database\\Seeders\\GenreSeeder
+```
+
+Catatan: kolom lama `songs.genre` (varchar) sengaja **dibiarkan ada** di DB
+supaya tidak kehilangan data kalau sudah pernah diisi manual — cuma sudah
+tidak dipakai di form/kode baru (diganti `genre_id` relasi ke tabel `genres`).
+Kalau mau dibersihkan, bikin migration terpisah untuk `dropColumn('genre')`
+setelah kamu migrasikan datanya ke `genre_id`.
+
+## Kompatibilitas PHP 8.5
+
+Tidak ada penyesuaian kode yang diperlukan — deprecation di PHP 8.5 (operator
+backtick, cast non-kanonik seperti `(boolean)`/`(integer)`, dll) tidak dipakai
+di codebase ini.
+
 ## Update: Halaman Publik + Transpose + Autoscroll
 
 File tambahan:

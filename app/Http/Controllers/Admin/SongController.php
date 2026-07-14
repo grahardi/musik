@@ -32,7 +32,9 @@ class SongController extends Controller
 
     public function create()
     {
-        return view('admin.songs.create', ['song' => new Song()]);
+        $genres = \App\Models\Genre::orderBy('name')->get();
+
+        return view('admin.songs.create', ['song' => new Song(), 'genres' => $genres]);
     }
 
     public function store(Request $request)
@@ -51,7 +53,9 @@ class SongController extends Controller
 
     public function edit(Song $song)
     {
-        return view('admin.songs.edit', compact('song'));
+        $genres = \App\Models\Genre::orderBy('name')->get();
+
+        return view('admin.songs.edit', compact('song', 'genres'));
     }
 
     public function update(Request $request, Song $song)
@@ -109,7 +113,7 @@ class SongController extends Controller
             'artist' => ['required', 'string', 'max:255'],
             'original_key' => ['nullable', 'string', 'max:10'],
             'capo' => ['nullable', 'string', 'max:10'],
-            'genre' => ['nullable', 'string', 'max:100'],
+            'genre_id' => ['nullable', 'exists:genres,id'],
             'chord_body' => ['required', 'string'],
             'source_url' => ['nullable', 'url'],
             'source_site' => ['nullable', 'in:manual,chordtela,ultimate-guitar'],

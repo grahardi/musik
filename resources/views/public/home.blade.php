@@ -26,6 +26,21 @@
         </div>
     </div>
 
+    @if ($genres->isNotEmpty())
+        <div class="card mb-4">
+            <div class="card-body">
+                <h6 class="mb-3">Genre</h6>
+                <div class="d-flex flex-wrap gap-2">
+                    @foreach ($genres as $genre)
+                        <a href="{{ route('songs.by-genre', $genre) }}" class="btn btn-sm btn-outline-dark">
+                            {{ $genre->name }} <span class="badge bg-dark">{{ $genre->songs_count }}</span>
+                        </a>
+                    @endforeach
+                </div>
+            </div>
+        </div>
+    @endif
+
     <h5 class="mb-3">Chord Terbaru</h5>
     <div class="row row-cols-1 row-cols-md-3 g-3">
         @forelse ($latest as $song)

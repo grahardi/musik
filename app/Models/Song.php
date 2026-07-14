@@ -19,7 +19,7 @@ class Song extends Model
         'first_letter_artist',
         'original_key',
         'capo',
-        'genre',
+        'genre_id',
         'chord_body',
         'source_url',
         'source_site',
@@ -73,6 +73,16 @@ class Song extends Model
     public function scopeByArtistLetter($query, string $letter)
     {
         return $query->where('first_letter_artist', mb_strtoupper($letter));
+    }
+
+    public function scopeByGenre($query, string $genreSlug)
+    {
+        return $query->whereHas('genre', fn ($g) => $g->where('slug', $genreSlug));
+    }
+
+    public function genre()
+    {
+        return $this->belongsTo(Genre::class);
     }
 
     public function getRouteKeyName()

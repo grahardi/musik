@@ -14,4 +14,5 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', [SongPublicController::class, 'home'])->name('home');
 Route::get('/cari', [SongPublicController::class, 'search'])->name('songs.search');
 Route::get('/huruf/{letter}', [SongPublicController::class, 'byLetter'])->name('songs.by-letter');
+Route::get('/genre/{genre:slug}', [SongPublicController::class, 'byGenre'])->name('songs.by-genre');
 Route::get('/chord/{song:slug}', [SongPublicController::class, 'show'])->name('songs.show');

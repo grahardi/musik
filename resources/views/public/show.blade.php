@@ -10,6 +10,7 @@
             <p class="text-muted mb-0">{{ $song->artist }}
                 @if ($song->original_key) &middot; Kunci Dasar: {{ $song->original_key }} @endif
                 @if ($song->capo) &middot; Capo: {{ $song->capo }} @endif
+                @if ($song->genre) &middot; <a href="{{ route('songs.by-genre', $song->genre) }}">{{ $song->genre->name }}</a> @endif
             </p>
         </div>
     </div>

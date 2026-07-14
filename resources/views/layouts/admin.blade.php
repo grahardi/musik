@@ -11,6 +11,7 @@
         <div class="container">
             <a class="navbar-brand" href="{{ route('admin.songs.index') }}">Admin Chord</a>
             <div>
+                <a class="btn btn-sm btn-outline-light me-1" href="{{ route('admin.genres.index') }}">Genre</a>
                 <a class="btn btn-sm btn-outline-light" href="{{ route('admin.songs.create') }}">+ Tambah Chord</a>
             </div>
         </div>

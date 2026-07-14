@@ -41,7 +41,17 @@
 
     <div class="col-md-3">
         <label class="form-label">Genre</label>
-        <input type="text" name="genre" value="{{ old('genre', $song->genre) }}" class="form-control">
+        <select name="genre_id" class="form-select">
+            <option value="">- Pilih Genre -</option>
+            @foreach ($genres as $genre)
+                <option value="{{ $genre->id }}" @selected(old('genre_id', $song->genre_id) == $genre->id)>
+                    {{ $genre->name }}
+                </option>
+            @endforeach
+        </select>
+        <div class="form-text">
+            Belum ada genre yang cocok? <a href="{{ route('admin.genres.create') }}" target="_blank">Tambah genre baru</a>.
+        </div>
     </div>
 
     <div class="col-md-3">
