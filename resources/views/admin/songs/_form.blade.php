@@ -146,4 +146,5 @@ document.getElementById('btn_convert_paste').addEventListener('click', function 
     document.getElementById('import_status').innerHTML =
         '<span class="text-success">Berhasil di-convert ke kolom "Isi Chord" di bawah. Cek judul/penyanyi/key manual ya.</span>';
 });
+</script>
 
