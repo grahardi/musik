@@ -91,16 +91,58 @@ class Song extends Model
     }
 
     /**
-     * Ubah format inline [C]lirik jadi HTML aman, dengan chord dibungkus
+     * Render chord_body jadi HTML aman, dengan chord dibungkus
      * <span class="chord-token"> supaya bisa di-transpose lewat JS.
+     *
+     * Support 2 format:
+     * 1. Inline: [C]lirik lagu disini
+     * 2. Chord-di-atas-lirik (paling umum dipakai situs chord Indonesia):
+     *        Am      F         C
+     *        separuh nafasku
+     *    Baris yang isinya CUMA token chord (dipisah spasi) otomatis
+     *    dikenali & di-highlight, spasi/posisi tetap dijaga biar sejajar
+     *    dengan lirik di bawahnya.
      */
     public function renderedChordHtml(): string
     {
-        $escaped = e($this->chord_body);
+        // Urutan alternatif penting: taruh yang lebih panjang duluan supaya
+        // regex tidak berhenti di potongan pendek (mis. "maj7" sebelum "maj").
+        $quality = 'maj9|maj7|maj|min11|min9|min7|min|m11|m9|m7|sus2|sus4|sus|dim7|dim|aug|add11|add9|6\/9|13|11|9|7|6|5|4|2|m';
+        $chordToken = '[A-G](?:#|b)?(?:' . $quality . ')*(?:\/[A-G](?:#|b)?)?';
 
-        return preg_replace_callback('/\[([A-G](?:#|b)?[^\]]*)\]/', function ($m) {
-            $chord = $m[1];
-            return '<span class="chord-token" data-original="' . e($chord) . '">' . e($chord) . '</span>';
-        }, $escaped);
+        $lines = preg_split('/\r\n|\r|\n/', $this->chord_body);
+
+        $rendered = array_map(function ($line) use ($chordToken) {
+            // Format inline [C]lirik
+            if (preg_match('/\[[^\]]+\]/', $line)) {
+                $escaped = e($line);
+
+                return preg_replace_callback('/\[([^\]]+)\]/', function ($m) {
+                    return '<span class="chord-token" data-original="' . e($m[1]) . '">' . e($m[1]) . '</span>';
+                }, $escaped);
+            }
+
+            $trimmed = trim($line);
+            if ($trimmed === '') {
+                return '';
+            }
+
+            $tokens = preg_split('/\s+/', $trimmed);
+            $isChordLine = collect($tokens)->every(
+                fn ($t) => preg_match('/^' . $chordToken . '$/', $t) === 1
+            );
+
+            if ($isChordLine) {
+                $escaped = e($line); // baris asli (dengan spasi aslinya) supaya posisi chord tetap sejajar lirik
+
+                return preg_replace_callback('/(?<=^|\s)(' . $chordToken . ')(?=\s|$)/', function ($m) {
+                    return '<span class="chord-token" data-original="' . e($m[1]) . '">' . e($m[1]) . '</span>';
+                }, $escaped);
+            }
+
+            return e($line);
+        }, $lines);
+
+        return implode("\n", $rendered);
     }
 }

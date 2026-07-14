@@ -11,7 +11,7 @@
         .letter-badge { min-width:42px; text-align:center; }
         .letter-badge.disabled { opacity:.35; pointer-events:none; }
         pre.chord-view { white-space: pre-wrap; font-size: 1rem; line-height: 1.9; background:#fff; padding:1.25rem; border-radius:.5rem; }
-        .chord-token { color:#0d6efd; font-weight:700; }
+        .chord-token { color:#0a2472; font-weight:700; }
     </style>
 </head>
 <body>
