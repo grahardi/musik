@@ -66,8 +66,8 @@ class SongPublicController extends Controller
 
         $songs = Song::published()
             ->where(function ($w) use ($q) {
-                $w->where('title', 'like', "%{$q}%")
-                  ->orWhere('artist', 'like', "%{$q}%");
+                $w->where('title', 'ilike', "%{$q}%")
+                  ->orWhere('artist', 'ilike', "%{$q}%");
             })
             ->orderBy('title')
             ->paginate(24)

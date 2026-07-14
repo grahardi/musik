@@ -61,6 +61,17 @@ Song::published()->byTitleLetter('A')->get();
 Song::published()->byArtistLetter('D')->get();
 ```
 
+## Kompatibilitas Laravel 13 + PHP 8.3 + PostgreSQL
+
+Project ini sudah dites cocok untuk stack:
+- **Laravel 13** (rilis Maret 2026) — minim breaking changes dari Laravel 12, jadi kode di sini jalan tanpa perubahan struktural.
+- **PHP 8.3** — sudah jadi minimum requirement Laravel 13, tidak ada penyesuaian.
+- **PostgreSQL** — satu penyesuaian yang sudah diterapkan: query pencarian pakai `ILIKE` (bukan `LIKE`), karena `LIKE` di Postgres case-sensitive sedangkan di MySQL tidak. Kolom `enum`, `char(1)`, `foreignId` semuanya sudah diabstraksi Laravel jadi otomatis jalan di driver `pgsql`.
+
+Kalau nanti pindah balik ke MySQL, tinggal ganti `ilike` jadi `like` lagi di:
+- `app/Http/Controllers/Admin/SongController.php`
+- `app/Http/Controllers/Public/SongPublicController.php`
+
 ## Update: Halaman Publik + Transpose + Autoscroll
 
 File tambahan:

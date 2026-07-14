@@ -16,8 +16,8 @@ class SongController extends Controller
         if ($request->filled('q')) {
             $q = $request->q;
             $query->where(function ($w) use ($q) {
-                $w->where('title', 'like', "%{$q}%")
-                  ->orWhere('artist', 'like', "%{$q}%");
+                $w->where('title', 'ilike', "%{$q}%")
+                  ->orWhere('artist', 'ilike', "%{$q}%");
             });
         }
 
