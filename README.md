@@ -152,6 +152,23 @@ saya buatkan karena belum diminta).
 Route login: `/admin/login` (GET tampil form, POST submit). Logout: tombol
 di navbar admin (POST ke `/admin/logout`).
 
+## Update: Fix deteksi baris "Label : Chord" + Convert Manual ke Inline
+
+**Fix**: baris seperti `Intro : C Am F G` atau `Interlude: Am F C G` sebelumnya
+gagal dianggap baris chord (karena kata "Intro"/"Interlude" bikin seluruh
+baris dianggap lirik biasa). Sekarang `Song::renderedChordHtml()` mendeteksi
+pola "label diikuti token-token chord di akhir baris" — label-nya dibiarkan
+teks biasa, token chord-nya tetap di-bold+highlight+bisa di-transpose.
+Supaya tidak salah tangkap lirik biasa, pola ini cuma dipakai kalau ada
+tanda `:` / `-`, atau label-nya pendek (maks 3 kata).
+
+**Baru**: tombol "🔧 Ubah ke Format Inline [C]" di form admin (dekat kolom
+Isi Chord). Ini konversi PAKSA dari format chord-di-atas-lirik jadi format
+inline `[C]lirik`, disimpan permanen setelah klik Simpan. Berguna sebagai
+jalan pintas kalau auto-detect di halaman publik masih meleset di kasus
+yang aneh-aneh — begitu diubah ke inline, tidak butuh deteksi lagi karena
+formatnya sudah eksplisit.
+
 ## Kompatibilitas PHP 8.5
 
 Tidak ada penyesuaian kode yang diperlukan — deprecation di PHP 8.5 (operator

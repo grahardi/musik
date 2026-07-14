@@ -75,7 +75,13 @@
     <div class="col-12">
         <label class="form-label">Isi Chord</label>
         <textarea name="chord_body" id="chord_body" rows="20" class="form-control font-monospace" required>{{ old('chord_body', $song->chord_body) }}</textarea>
-        <div class="form-text">Format inline: <code>[C]lirik lagu [G]disini</code></div>
+        <div class="form-text">
+            Format inline: <code>[C]lirik lagu disini</code> — atau format chord-di-atas-lirik biasa juga otomatis dikenali.
+        </div>
+        <button type="button" id="btn_to_inline" class="btn btn-sm btn-outline-secondary mt-2">
+            🔧 Ubah ke Format Inline [C]
+        </button>
+        <span class="text-muted small">(pakai ini kalau auto-detect di halaman publik masih salah, biar formatnya pasti)</span>
         @error('chord_body') <div class="text-danger small">{{ $message }}</div> @enderror
     </div>
 
@@ -146,5 +152,104 @@ document.getElementById('btn_convert_paste').addEventListener('click', function 
     document.getElementById('import_status').innerHTML =
         '<span class="text-success">Berhasil di-convert ke kolom "Isi Chord" di bawah. Cek judul/penyanyi/key manual ya.</span>';
 });
+
+document.getElementById('btn_to_inline').addEventListener('click', function () {
+    const textarea = document.getElementById('chord_body');
+    textarea.value = convertToInlineFormat(textarea.value);
+});
+
+/**
+ * Ubah teks format "chord-di-atas / lirik-di-bawah" (dan baris label
+ * seperti "Intro : C Am F G") jadi format inline [C]lirik. Baris yang
+ * sudah inline atau lirik biasa dibiarkan apa adanya.
+ */
+function convertToInlineFormat(text) {
+    const quality = 'maj9|maj7|maj|min11|min9|min7|min|m11|m9|m7|sus2|sus4|sus|dim7|dim|aug|add11|add9|6\\/9|13|11|9|7|6|5|4|2|m';
+    const chordTokenRe = new RegExp('^[A-G](#|b)?(?:' + quality + ')*(?:\\/[A-G](?:#|b)?)?$');
+
+    function getTokensWithOffset(line) {
+        const tokens = [];
+        const re = /\S+/g;
+        let m;
+        while ((m = re.exec(line)) !== null) {
+            tokens.push({ text: m[0], offset: m.index });
+        }
+        return tokens;
+    }
+
+    function isFullChordLine(line) {
+        const tokens = getTokensWithOffset(line);
+        if (tokens.length === 0) return false;
+        return tokens.every(t => chordTokenRe.test(t.text));
+    }
+
+    function mergeChordIntoLyric(chordLine, lyricLine) {
+        const tokens = getTokensWithOffset(chordLine);
+        let chars = Array.from(lyricLine);
+        let shift = 0;
+
+        tokens.forEach(t => {
+            const bracket = `[${t.text}]`;
+            const insertPos = Math.min(t.offset + shift, chars.length);
+            chars.splice(insertPos, 0, ...Array.from(bracket));
+            shift += bracket.length;
+        });
+
+        return chars.join('');
+    }
+
+    const lines = text.split(/\r\n|\r|\n/);
+    const result = [];
+    let i = 0;
+
+    while (i < lines.length) {
+        const line = lines[i];
+
+        // Sudah format inline atau baris kosong -> biarkan
+        if (line.includes('[') || line.trim() === '') {
+            result.push(line);
+            i++;
+            continue;
+        }
+
+        if (isFullChordLine(line)) {
+            const nextLine = lines[i + 1];
+            const nextIsLyric = nextLine !== undefined && nextLine.trim() !== '' && !isFullChordLine(nextLine) && !nextLine.includes('[');
+
+            if (nextIsLyric) {
+                result.push(mergeChordIntoLyric(line, nextLine));
+                i += 2;
+            } else {
+                // Baris chord berdiri sendiri (mis. intro/outro tanpa lirik di bawahnya)
+                const bracketed = getTokensWithOffset(line).map(t => `[${t.text}]`).join(' ');
+                result.push(bracketed);
+                i++;
+            }
+            continue;
+        }
+
+        // Cek baris label + chord, mis. "Intro : C Am F G"
+        const tokens = getTokensWithOffset(line);
+        let k = 0;
+        for (let j = tokens.length - 1; j >= 0; j--) {
+            if (chordTokenRe.test(tokens[j].text)) k++; else break;
+        }
+        const hasSep = line.includes(':') || line.includes('-');
+        if (k > 0 && k < tokens.length && (hasSep || (tokens.length - k) <= 3)) {
+            const splitIdx = tokens.length - k;
+            const splitPos = tokens[splitIdx].offset;
+            const prefix = line.slice(0, splitPos);
+            const chordPart = tokens.slice(splitIdx).map(t => `[${t.text}]`).join(' ');
+            result.push(prefix + chordPart);
+            i++;
+            continue;
+        }
+
+        result.push(line);
+        i++;
+    }
+
+    return result.join('\n');
+}
 </script>
 

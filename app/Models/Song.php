@@ -105,8 +105,6 @@ class Song extends Model
      */
     public function renderedChordHtml(): string
     {
-        // Urutan alternatif penting: taruh yang lebih panjang duluan supaya
-        // regex tidak berhenti di potongan pendek (mis. "maj7" sebelum "maj").
         $quality = 'maj9|maj7|maj|min11|min9|min7|min|m11|m9|m7|sus2|sus4|sus|dim7|dim|aug|add11|add9|6\/9|13|11|9|7|6|5|4|2|m';
         $chordToken = '[A-G](?:#|b)?(?:' . $quality . ')*(?:\/[A-G](?:#|b)?)?';
 
@@ -122,22 +120,56 @@ class Song extends Model
                 }, $escaped);
             }
 
-            $trimmed = trim($line);
-            if ($trimmed === '') {
+            if (trim($line) === '') {
                 return '';
             }
 
-            $tokens = preg_split('/\s+/', $trimmed);
-            $isChordLine = collect($tokens)->every(
-                fn ($t) => preg_match('/^' . $chordToken . '$/', $t) === 1
-            );
+            // Ambil semua token non-spasi beserta posisinya di baris asli
+            preg_match_all('/\S+/', $line, $m, PREG_OFFSET_CAPTURE);
+            $tokens = $m[0];
 
-            if ($isChordLine) {
-                $escaped = e($line); // baris asli (dengan spasi aslinya) supaya posisi chord tetap sejajar lirik
+            if (empty($tokens)) {
+                return e($line);
+            }
 
-                return preg_replace_callback('/(?<=^|\s)(' . $chordToken . ')(?=\s|$)/', function ($m) {
-                    return '<span class="chord-token" data-original="' . e($m[1]) . '">' . e($m[1]) . '</span>';
-                }, $escaped);
+            $isChord = fn ($t) => preg_match('/^' . $chordToken . '$/', $t) === 1;
+
+            // Hitung berapa token dari BELAKANG yang semuanya chord
+            // (menangani baris label seperti "Intro : C Am F G")
+            $k = 0;
+            for ($i = count($tokens) - 1; $i >= 0; $i--) {
+                if ($isChord($tokens[$i][0])) {
+                    $k++;
+                } else {
+                    break;
+                }
+            }
+
+            $wrapChords = function (string $segment) use ($chordToken) {
+                return preg_replace_callback('/(?<=^|\s)(' . $chordToken . ')(?=\s|$)/', function ($mm) {
+                    return '<span class="chord-token" data-original="' . e($mm[1]) . '">' . e($mm[1]) . '</span>';
+                }, e($segment));
+            };
+
+            if ($k === count($tokens)) {
+                // Semua token adalah chord -> baris chord murni
+                return $wrapChords($line);
+            }
+
+            if ($k > 0) {
+                $labelTokenCount = count($tokens) - $k;
+                $hasColonOrDash = str_contains($line, ':') || str_contains($line, '-');
+
+                // Hanya anggap "label + chord" kalau ada ':' / '-' sebagai penanda,
+                // atau labelnya pendek (maks 3 kata) -- biar tidak salah tangkap
+                // baris lirik biasa yang kebetulan diakhiri kata mirip chord.
+                if ($hasColonOrDash || $labelTokenCount <= 3) {
+                    $splitPos = $tokens[count($tokens) - $k][1];
+                    $prefix = substr($line, 0, $splitPos);
+                    $suffix = substr($line, $splitPos);
+
+                    return e($prefix) . $wrapChords($suffix);
+                }
             }
 
             return e($line);
