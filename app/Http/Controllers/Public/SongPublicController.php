@@ -97,6 +97,38 @@ class SongPublicController extends Controller
         $song->load('genre');
         $song->increment('views_count');
 
-        return view('public.show', compact('song'));
+        $related = $this->getRelatedSongs($song);
+
+        return view('public.show', compact('song', 'related'));
+    }
+
+    /**
+     * 10 lagu terkait: diutamakan dari penyanyi/band yang sama,
+     * sisanya (kalau kurang dari 10) diisi dari genre yang sama.
+     */
+    protected function getRelatedSongs(Song $song, int $limit = 10)
+    {
+        $sameArtist = Song::published()
+            ->where('id', '!=', $song->id)
+            ->where('artist', $song->artist)
+            ->inRandomOrder()
+            ->take($limit)
+            ->get();
+
+        if ($sameArtist->count() >= $limit || ! $song->genre_id) {
+            return $sameArtist;
+        }
+
+        $remaining = $limit - $sameArtist->count();
+
+        $sameGenre = Song::published()
+            ->where('id', '!=', $song->id)
+            ->where('genre_id', $song->genre_id)
+            ->whereNotIn('id', $sameArtist->pluck('id'))
+            ->inRandomOrder()
+            ->take($remaining)
+            ->get();
+
+        return $sameArtist->concat($sameGenre);
     }
 }

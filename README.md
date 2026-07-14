@@ -72,6 +72,28 @@ Kalau nanti pindah balik ke MySQL, tinggal ganti `ilike` jadi `like` lagi di:
 - `app/Http/Controllers/Admin/SongController.php`
 - `app/Http/Controllers/Public/SongPublicController.php`
 
+## Update: Related Songs
+
+Di bawah halaman detail chord sekarang tampil 10 lagu terkait — diambil
+lewat `SongPublicController::getRelatedSongs()`:
+1. Diutamakan lagu lain dari **penyanyi/band yang sama** (acak, maks 10).
+2. Kalau kurang dari 10, sisanya diisi dari lagu **genre yang sama**.
+
+Tidak perlu migration tambahan — fitur ini murni query dari data yang sudah ada.
+
+## Catatan: menjalankan artisan dengan namespace berbackslash di bash
+
+Kalau jalankan command seperti:
+```bash
+php artisan db:seed --class=Database\Seeders\GenreSeeder
+```
+tanpa kutip, shell bash akan "memakan" backslash-nya sehingga jadi
+`DatabaseSeedersGenreSeeder` (class tidak ditemukan). Selalu bungkus pakai
+kutip tunggal:
+```bash
+php artisan db:seed --class='Database\Seeders\GenreSeeder'
+```
+
 ## Update: Fitur Genre / Kategori
 
 File baru:

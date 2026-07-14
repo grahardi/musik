@@ -43,6 +43,25 @@
             Referensi awal diambil dari <a href="{{ $song->source_url }}" target="_blank" rel="noopener nofollow">sumber asli</a>, disunting ulang untuk situs ini.
         </p>
     @endif
+
+    @if ($related->isNotEmpty())
+        <hr class="my-4">
+        <h6 class="mb-3">Chord Lainnya {{ $related->contains('artist', $song->artist) ? "dari {$song->artist}" : 'yang Mungkin Kamu Suka' }}</h6>
+        <div class="row row-cols-1 row-cols-md-2 g-2">
+            @foreach ($related as $item)
+                <div class="col">
+                    <a href="{{ route('songs.show', $item) }}" class="text-decoration-none text-dark">
+                        <div class="card h-100">
+                            <div class="card-body py-2">
+                                <div class="fw-semibold">{{ $item->title }}</div>
+                                <div class="text-muted small">{{ $item->artist }}</div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            @endforeach
+        </div>
+    @endif
 @endsection
 
 @section('scripts')
