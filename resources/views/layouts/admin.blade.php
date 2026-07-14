@@ -12,7 +12,11 @@
             <a class="navbar-brand" href="{{ route('admin.songs.index') }}">Admin Chord</a>
             <div>
                 <a class="btn btn-sm btn-outline-light me-1" href="{{ route('admin.genres.index') }}">Genre</a>
-                <a class="btn btn-sm btn-outline-light" href="{{ route('admin.songs.create') }}">+ Tambah Chord</a>
+                <a class="btn btn-sm btn-outline-light me-1" href="{{ route('admin.songs.create') }}">+ Tambah Chord</a>
+                <form action="{{ route('admin.logout') }}" method="POST" class="d-inline">
+                    @csrf
+                    <button class="btn btn-sm btn-outline-danger">Logout</button>
+                </form>
             </div>
         </div>
     </nav>

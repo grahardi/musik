@@ -121,6 +121,37 @@ tidak dipakai di form/kode baru (diganti `genre_id` relasi ke tabel `genres`).
 Kalau mau dibersihkan, bikin migration terpisah untuk `dropColumn('genre')`
 setelah kamu migrasikan datanya ke `genre_id`.
 
+## Update: Login Admin (baru dibuat, sebelumnya belum ada)
+
+Sebelumnya saya salah asumsi kamu sudah punya sistem login. Sekarang sudah
+dibuatkan login sederhana pakai auth bawaan Laravel (tanpa Breeze/Jetstream):
+
+File baru:
+- `app/Http/Controllers/Admin/AuthController.php`
+- `resources/views/admin/auth/login.blade.php`
+- `database/seeders/AdminUserSeeder.php`
+
+**Wajib** tambahkan ini di `bootstrap/app.php` (struktur baru Laravel 11+/13,
+bukan lagi `Kernel.php`), supaya waktu belum login diarahkan ke
+`/admin/login` bukan `/login` bawaan default:
+
+```php
+->withMiddleware(function (Illuminate\Foundation\Configuration\Middleware $middleware) {
+    $middleware->redirectGuestsTo(fn () => route('admin.login'));
+})
+```
+
+Setup akun admin pertama:
+```bash
+php artisan db:seed --class='Database\Seeders\AdminUserSeeder'
+```
+Login pakai `admin@musik.raisa.id` / `GantiSegera123!`, **lalu langsung ganti
+password** (lewat tinker atau bikin halaman ganti password sendiri — belum
+saya buatkan karena belum diminta).
+
+Route login: `/admin/login` (GET tampil form, POST submit). Logout: tombol
+di navbar admin (POST ke `/admin/logout`).
+
 ## Kompatibilitas PHP 8.5
 
 Tidak ada penyesuaian kode yang diperlukan — deprecation di PHP 8.5 (operator
