@@ -3,6 +3,43 @@
 @section('title', 'Daftar Chord')
 
 @section('content')
+    <div class="row g-3 mb-3">
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h6 class="card-title">🆕 Baru Ditambahkan</h6>
+                    <ul class="list-group list-group-flush">
+                        @forelse ($recentlyAdded as $item)
+                            <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                <a href="{{ route('admin.songs.edit', $item) }}">{{ $item->title }} — {{ $item->artist }}</a>
+                                <span class="text-muted small">{{ $item->created_at->diffForHumans() }}</span>
+                            </li>
+                        @empty
+                            <li class="list-group-item px-0 text-muted">Belum ada data.</li>
+                        @endforelse
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h6 class="card-title">✏️ Baru Diedit</h6>
+                    <ul class="list-group list-group-flush">
+                        @forelse ($recentlyEdited as $item)
+                            <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                <a href="{{ route('admin.songs.edit', $item) }}">{{ $item->title }} — {{ $item->artist }}</a>
+                                <span class="text-muted small">{{ $item->updated_at->diffForHumans() }}</span>
+                            </li>
+                        @empty
+                            <li class="list-group-item px-0 text-muted">Belum ada yang diedit.</li>
+                        @endforelse
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="card">
         <div class="card-body">
             <form method="GET" class="row g-2 mb-3">

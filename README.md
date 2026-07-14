@@ -179,6 +179,32 @@ CSS `@media print` di `layouts/public.blade.php` otomatis:
 - Paksa warna putih/hitam walau lagi dark mode (biar hemat tinta & tetap kebaca)
 - Judul lagu, penyanyi, key/capo, dan isi chord tetap muncul (termasuk chord yang lagi di-transpose — karena itu langsung ubah teks di DOM, bukan cuma tampilan)
 
+## Update: Deteksi Chord Disederhanakan (Kapital = Chord)
+
+`Song::renderedChordHtml()` diganti total pakai aturan yang lebih simpel &
+lebih kuat: token **HURUF KAPITAL** yang sesuai grammar chord (A-G, boleh
+`#`/`b`, angka, `m`, slash bass seperti `G/B`) dianggap chord **di mana pun**
+posisinya dalam baris:
+- Baris chord berdiri sendiri: `Am F C`
+- Baris label: `Intro : C Am F G`
+- Nyempil di tengah lirik: `Lirik lagu C disini D lagi`
+- Disambung strip: `C-D-E`
+
+**Huruf kecil TIDAK dianggap chord** (`c`, `d`, dst tetap teks biasa). Sudah
+dites terhadap kata-kata kapital di awal kalimat yang berisiko salah tangkap
+(`Cinta`, `Dan`, `Bila`, `Fajar`, `Emma`, dll) — semua aman, tetap dianggap
+lirik biasa karena tidak match grammar chord (bukan cuma huruf pertama).
+
+Format lama inline `[C]lirik` tetap didukung juga.
+
+## Update: Widget "Baru Ditambahkan" & "Baru Diedit" di Admin
+
+Di atas tabel daftar chord (`/admin/songs`), sekarang ada 2 kartu:
+- **🆕 Baru Ditambahkan** — 5 lagu terakhir yang dibuat (`created_at` terbaru)
+- **✏️ Baru Diedit** — 5 lagu terakhir yang diedit (`updated_at` > `created_at`, jadi lagu yang belum pernah diedit tidak dobel muncul di sini)
+
+Klik judul lagu di widget langsung ke halaman edit.
+
 ## Kompatibilitas PHP 8.5
 
 Tidak ada penyesuaian kode yang diperlukan — deprecation di PHP 8.5 (operator

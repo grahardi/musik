@@ -27,7 +27,15 @@ class SongController extends Controller
 
         $songs = $query->paginate(20)->withQueryString();
 
-        return view('admin.songs.index', compact('songs'));
+        // Widget: 5 lagu yang baru ditambahkan & 5 yang baru diedit (bukan baru ditambah)
+        $recentlyAdded = Song::latest('created_at')->take(5)->get();
+
+        $recentlyEdited = Song::whereColumn('updated_at', '>', 'created_at')
+            ->latest('updated_at')
+            ->take(5)
+            ->get();
+
+        return view('admin.songs.index', compact('songs', 'recentlyAdded', 'recentlyEdited'));
     }
 
     public function create()
