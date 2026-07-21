@@ -129,32 +129,54 @@ class Song extends Model
         $boundary = '[\s\-,;:!?()]';
 
         $lines = preg_split('/\r\n|\r|\n/', $this->chord_body);
+        $total = count($lines);
+        $output = '';
 
-        $rendered = array_map(function ($line) use ($chordToken, $boundary) {
+        foreach ($lines as $idx => $line) {
+            $newline = ($idx < $total - 1) ? "\n" : '';
+
             // Format lama inline [C]lirik (kalau masih ada yang pakai)
             if (preg_match('/\[[^\]]+\]/', $line)) {
                 $escaped = e($line);
-
-                return preg_replace_callback('/\[([^\]]+)\]/', function ($m) {
+                $htmlLine = preg_replace_callback('/\[([^\]]+)\]/', function ($m) {
                     return '<span class="chord-token" data-original="' . $m[1] . '">' . $m[1] . '</span>';
                 }, $escaped);
+
+                $output .= $htmlLine . $newline;
+                continue;
             }
 
             if (trim($line) === '') {
-                return '';
+                $output .= $newline;
+                continue;
             }
 
             $escaped = e($line);
-
-            return preg_replace_callback(
+            $htmlLine = preg_replace_callback(
                 '/(^|' . $boundary . ')(' . $chordToken . ')(?=$|' . $boundary . ')/',
                 function ($m) {
                     return $m[1] . '<span class="chord-token" data-original="' . $m[2] . '">' . $m[2] . '</span>';
                 },
                 $escaped
             );
-        }, $lines);
 
-        return implode("\n", $rendered);
+            // Cek apakah baris ini isinya 100% chord (tiap token yang dipisah
+            // spasi cocok grammar chord) -- kalau iya, bungkus SATU BARIS PENUH
+            // (termasuk newline-nya) dalam elemen yang bisa disembunyikan utuh
+            // saat mode "Lirik Saja", biar tidak nyisain baris kosong/jeda.
+            preg_match_all('/\S+/', $line, $tm);
+            $tokens = $tm[0];
+            $isPureChordLine = ! empty($tokens) && collect($tokens)->every(
+                fn ($t) => preg_match('/^' . $chordToken . '$/', $t) === 1
+            );
+
+            if ($isPureChordLine) {
+                $output .= '<span class="chord-line-wrap">' . $htmlLine . $newline . '</span>';
+            } else {
+                $output .= $htmlLine . $newline;
+            }
+        }
+
+        return $output;
     }
 }
