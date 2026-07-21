@@ -30,6 +30,7 @@
         }
         .chord-token { color:#0a2472; font-weight:700; }
         [data-bs-theme="dark"] .chord-token { color:#7aa7ff; }
+        .chord-view.lyrics-only .chord-token { display: none; }
 
         @media print {
             .navbar, footer, .no-print { display: none !important; }

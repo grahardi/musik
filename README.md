@@ -219,6 +219,13 @@ di PC maupun HP). File yang berubah: `public/js/chord-tools.js` (parseFloat,
 bukan parseInt lagi) dan `resources/views/public/show.blade.php` (atribut
 `min`/`max`/`step` slider).
 
+## Update: Fitur "Lirik Saja"
+
+Tombol "📝 Lirik Saja" di sebelah tombol Cetak (halaman detail lagu). Klik
+sekali → semua chord (`.chord-token`) disembunyikan, cuma lirik yang
+kelihatan. Klik lagi ("🎸 Tampilkan Chord") → chord muncul lagi. Murni
+toggle CSS (`display:none`), tidak reload halaman, tidak mengubah data.
+
 ## Kompatibilitas PHP 8.5
 
 Tidak ada penyesuaian kode yang diperlukan — deprecation di PHP 8.5 (operator

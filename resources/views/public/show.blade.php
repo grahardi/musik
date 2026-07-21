@@ -37,10 +37,11 @@
             <div class="vr d-none d-md-block"></div>
 
             <button id="btn-print" type="button" class="btn btn-sm btn-outline-dark">🖨 Cetak</button>
+            <button id="btn-lyrics-only" type="button" class="btn btn-sm btn-outline-secondary" data-state="off">📝 Lirik Saja</button>
         </div>
     </div>
 
-    <pre class="chord-view">{!! $song->renderedChordHtml() !!}</pre>
+    <pre class="chord-view" id="chord-view">{!! $song->renderedChordHtml() !!}</pre>
 
     @if ($song->source_url)
         <p class="text-muted small mt-3 no-print">
@@ -75,6 +76,18 @@
     <script>
         document.getElementById('btn-print')?.addEventListener('click', function () {
             window.print();
+        });
+
+        document.getElementById('btn-lyrics-only')?.addEventListener('click', function () {
+            const chordView = document.getElementById('chord-view');
+            const btn = this;
+            const isOn = btn.getAttribute('data-state') === 'on';
+
+            chordView.classList.toggle('lyrics-only', !isOn);
+            btn.setAttribute('data-state', isOn ? 'off' : 'on');
+            btn.textContent = isOn ? '📝 Lirik Saja' : '🎸 Tampilkan Chord';
+            btn.classList.toggle('btn-outline-secondary', isOn);
+            btn.classList.toggle('btn-secondary', !isOn);
         });
     </script>
 @endsection
